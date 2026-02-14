@@ -201,15 +201,14 @@ export const getUserIncidents = async (userId, maxResults = 20) => {
     const uid = userId || auth.currentUser?.uid
     if (!uid) return []
 
+    // Simple query — no orderBy to avoid needing a composite index
     const q = query(
       collection(db, 'incidents'),
       where('userId', '==', uid),
-      orderBy('timestamp', 'desc'),
-      limit(maxResults)
     )
 
     const snapshot = await getDocs(q)
-    return snapshot.docs
+    const results = snapshot.docs
       .filter(d => d.data().timestamp != null)
       .map(d => {
         const data = d.data()
@@ -220,6 +219,15 @@ export const getUserIncidents = async (userId, maxResults = 20) => {
           lon: data.longitude,
         }
       })
+
+    // Sort client-side (newest first) and limit
+    results.sort((a, b) => {
+      const ta = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp)
+      const tb = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp)
+      return tb - ta
+    })
+
+    return results.slice(0, maxResults)
   } catch (error) {
     console.error('[ShieldSync] getUserIncidents error:', error)
     return []
