@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { submitReport } from '../services/reportService'
 import { trackEvent } from '../services/firebase'
-import { X, ShieldAlert, Car, AlertTriangle, UserX, Cross, HelpCircle, Mic, Send } from 'lucide-react'
+import { X, ShieldAlert, Car, AlertTriangle, UserX, Cross, HelpCircle, Mic, Send, MapPin, Navigation } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const REPORT_TYPES = [
@@ -13,28 +13,38 @@ const REPORT_TYPES = [
   { id: 'other', label: 'Other', icon: HelpCircle, color: 'text-white/50', bg: 'bg-white/5', activeBorder: 'border-white/30' },
 ]
 
-export default function ReportModal({ isOpen, onClose, userLocation }) {
+export default function ReportModal({ isOpen, onClose, userLocation, selectedLocation, onPinOnMap }) {
   const [step, setStep] = useState(1)
   const [selectedType, setSelectedType] = useState(null)
   const [description, setDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
+  // The effective location: manual pin overrides GPS
+  const effectiveLocation = selectedLocation || userLocation || { lat: 1.4927, lon: 103.7414 }
+  const isUsingPin = !!selectedLocation
+
+  const [submitError, setSubmitError] = useState('')
+
   const handleSubmit = async () => {
     if (!selectedType) return
 
     setIsSubmitting(true)
+    setSubmitError('')
     try {
-      const loc = userLocation || { lat: 1.4927, lon: 103.7414 }
       const reportData = {
         type: selectedType.id,
         description,
-        location: loc,        // submitReport extracts lat/lon from this
+        location: effectiveLocation,
       }
 
-      await submitReport(reportData)
-      trackEvent('report_submitted', { type: selectedType.id })
+      const result = await submitReport(reportData)
 
+      if (!result?.success) {
+        throw new Error(result?.error || 'Unknown error')
+      }
+
+      trackEvent('report_submitted', { type: selectedType.id })
       setIsSuccess(true)
       setTimeout(() => {
         onClose()
@@ -42,7 +52,14 @@ export default function ReportModal({ isOpen, onClose, userLocation }) {
       }, 2000)
     } catch (error) {
       console.error('Report submission failed:', error)
-      alert('Failed to submit report. Please try again.')
+      const msg = error?.message || 'Unknown error'
+      if (msg.includes('auth') || msg.includes('Auth')) {
+        setSubmitError('Authentication failed. Make sure Anonymous Auth is enabled in Firebase Console.')
+      } else if (msg.includes('permission') || msg.includes('PERMISSION')) {
+        setSubmitError('Permission denied. Check your Firestore Security Rules.')
+      } else {
+        setSubmitError(`Failed to submit: ${msg}`)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -53,6 +70,7 @@ export default function ReportModal({ isOpen, onClose, userLocation }) {
     setSelectedType(null)
     setDescription('')
     setIsSuccess(false)
+    setSubmitError('')
   }
 
   if (!isOpen) return null
@@ -159,6 +177,42 @@ export default function ReportModal({ isOpen, onClose, userLocation }) {
                       </button>
                     </div>
 
+                    {/* Location section */}
+                    <div>
+                      <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2">
+                        Location
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <div className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium ${
+                          isUsingPin
+                            ? 'bg-accent-500/10 border-accent-500/30 text-accent-300'
+                            : 'bg-white/[0.04] border-white/10 text-white/50'
+                        }`}>
+                          {isUsingPin ? (
+                            <><MapPin size={14} className="text-accent-400" />
+                              <span>Pinned: {effectiveLocation.lat.toFixed(4)}, {effectiveLocation.lon.toFixed(4)}</span>
+                            </>
+                          ) : (
+                            <><Navigation size={14} className="text-primary-400" />
+                              <span>Using GPS location</span>
+                            </>
+                          )}
+                        </div>
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => onPinOnMap?.()}
+                          className="px-3 py-2.5 rounded-xl bg-accent-500/15 border border-accent-500/30
+                                     text-accent-300 text-xs font-bold hover:bg-accent-500/25 transition-colors
+                                     flex items-center gap-1.5 whitespace-nowrap"
+                        >
+                          <MapPin size={14} />
+                          Pin on Map
+                        </motion.button>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2">
                         What's happening?
@@ -172,6 +226,13 @@ export default function ReportModal({ isOpen, onClose, userLocation }) {
                                    font-medium resize-none text-white placeholder-white/20 text-sm"
                       />
                     </div>
+
+                    {/* Error message */}
+                    {submitError && (
+                      <div className="px-4 py-3 rounded-xl bg-danger-500/10 border border-danger-500/30 text-danger-300 text-xs font-medium">
+                        {submitError}
+                      </div>
+                    )}
 
                     <motion.button
                       whileHover={{ scale: 1.02 }}

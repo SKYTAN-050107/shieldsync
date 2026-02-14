@@ -1,6 +1,6 @@
 // src/components/SafetyMap.jsx
 import { useEffect, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, ZoomControl } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, ZoomControl, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -27,7 +27,31 @@ const SERVICE_ICONS = {
   hospital: createIcon('#10b981', '🏥'),
 }
 
-const INCIDENT_ICON = createIcon('#DC2626', '⚠️')
+// ---- Type-specific incident icons ----
+const INCIDENT_ICONS = {
+  crime:      createIcon('#DC2626', '🚨'),  // Red
+  accident:   createIcon('#EA580C', '🚗'),  // Orange
+  hazard:     createIcon('#EAB308', '⚠️'),  // Yellow
+  harassment: createIcon('#A855F7', '🚷'),  // Purple
+  medical:    createIcon('#3B82F6', '🏥'),  // Blue
+  other:      createIcon('#6B7280', '❓'),  // Gray
+}
+const INCIDENT_ICON_DEFAULT = createIcon('#DC2626', '⚠️')
+
+// Preview pin shown while user is selecting a location
+const PREVIEW_ICON = L.divIcon({
+  className: '',
+  html: `<div style="
+    background:#f43f5e;
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;border:3px solid #fff;
+    box-shadow:0 0 16px rgba(244,63,94,0.6);
+    animation:pulse 1.2s ease-in-out infinite;
+  ">📍</div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+})
 
 const USER_ICON = L.divIcon({
   className: '',
@@ -49,12 +73,27 @@ function RecenterMap({ lat, lon }) {
   return null
 }
 
+// ---- Click handler for location-selection mode ----
+function MapClickHandler({ enabled, onLocationSelect }) {
+  useMapEvents({
+    click(e) {
+      if (enabled && onLocationSelect) {
+        onLocationSelect({ lat: e.latlng.lat, lon: e.latlng.lng })
+      }
+    },
+  })
+  return null
+}
+
 export default function SafetyMap({
   userLocation,
   emergencyServices = [],
   incidents = [],
   onSelectService,
   onSelectIncident,
+  isSelectingLocation = false,
+  onLocationSelect,
+  selectedLocation,
 }) {
   if (!userLocation) {
     return (
@@ -84,6 +123,18 @@ export default function SafetyMap({
       />
 
       <RecenterMap lat={userLocation.lat} lon={userLocation.lon} />
+
+      {/* Map click handler for pin-on-map selection mode */}
+      <MapClickHandler enabled={isSelectingLocation} onLocationSelect={onLocationSelect} />
+
+      {/* Preview marker when user is selecting a location */}
+      {selectedLocation && (
+        <Marker position={[selectedLocation.lat, selectedLocation.lon]} icon={PREVIEW_ICON}>
+          <Popup className="dark-popup">
+            <strong>Selected Location</strong>
+          </Popup>
+        </Marker>
+      )}
 
       {/* User location marker + accuracy circle */}
       <Marker position={center} icon={USER_ICON}>
@@ -132,12 +183,12 @@ export default function SafetyMap({
         )
       })}
 
-      {/* Incident markers */}
+      {/* Incident markers (type-specific icons) */}
       {incidents.map((inc) => (
         <Marker
           key={inc.id}
           position={[inc.lat, inc.lon]}
-          icon={INCIDENT_ICON}
+          icon={INCIDENT_ICONS[inc.type] || INCIDENT_ICON_DEFAULT}
           eventHandlers={{ click: () => onSelectIncident?.(inc) }}
         >
           <Popup className="dark-popup">

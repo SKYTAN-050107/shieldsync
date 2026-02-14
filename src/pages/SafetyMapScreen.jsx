@@ -7,7 +7,7 @@ import SafetyMap from '../components/SafetyMap'
 import ReportModal from '../components/ReportModal'
 import EmergencyCard from '../components/EmergencyCard'
 import IncidentCard from '../components/IncidentCard'
-import { AlertTriangle, Layers, Radio, Shield, Flame, Cross } from 'lucide-react'
+import { AlertTriangle, Layers, Radio, Shield, Flame, Cross, MapPin, X as XIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const FILTER_OPTIONS = [
@@ -27,6 +27,8 @@ export default function SafetyMapScreen() {
   const [loading, setLoading] = useState(true)
   const [allServices, setAllServices] = useState([])
   const [activeFilter, setActiveFilter] = useState('all')
+  const [isSelectingLocation, setIsSelectingLocation] = useState(false)
+  const [manualLocation, setManualLocation] = useState(null)
 
   // 1. Get real user location
   useEffect(() => {
@@ -60,28 +62,64 @@ export default function SafetyMapScreen() {
 
   // 3. Real-time Firestore listener for community incidents
   useEffect(() => {
-    const unsub = subscribeToIncidents(24, (data) => setIncidents(data))
+    const unsub = subscribeToIncidents(12, (data) => setIncidents(data))
     return () => unsub()
   }, [])
 
   return (
     <div className="relative h-screen w-full bg-surface-900 overflow-hidden">
       {/* Safety Map Component */}
-      <div className="absolute inset-0 z-0">
+      <div className={`absolute inset-0 z-0 ${isSelectingLocation ? 'cursor-crosshair' : ''}`}>
         <SafetyMap
           userLocation={userLocation}
           emergencyServices={services}
           incidents={incidents}
           onSelectService={(s) => {
+            if (isSelectingLocation) return // ignore service clicks in selection mode
             setSelectedService(s)
             setSelectedIncident(null)
           }}
           onSelectIncident={(i) => {
+            if (isSelectingLocation) return
             setSelectedIncident(i)
             setSelectedService(null)
           }}
+          isSelectingLocation={isSelectingLocation}
+          selectedLocation={manualLocation}
+          onLocationSelect={(loc) => {
+            setManualLocation(loc)
+            setIsSelectingLocation(false)
+            setIsReportModalOpen(true) // re-open modal with pinned location
+          }}
         />
       </div>
+
+      {/* Selection-mode banner */}
+      <AnimatePresence>
+        {isSelectingLocation && (
+          <motion.div
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -60, opacity: 0 }}
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3
+                       px-5 py-3 rounded-2xl bg-accent-600/90 backdrop-blur-md border border-accent-400/30
+                       shadow-xl shadow-accent-600/20"
+          >
+            <MapPin size={18} className="text-white animate-bounce" />
+            <span className="text-white font-bold text-sm">Tap on the map to pin location</span>
+            <button
+              onClick={() => {
+                setIsSelectingLocation(false)
+                setIsReportModalOpen(true) // cancel → re-open modal
+              }}
+              className="ml-2 h-7 w-7 rounded-full bg-white/20 flex items-center justify-center
+                         hover:bg-white/30 transition-colors"
+            >
+              <XIcon size={14} className="text-white" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Top bar: Filter + Report */}
       <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between gap-2">
@@ -190,8 +228,16 @@ export default function SafetyMapScreen() {
 
       <ReportModal
         isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
+        onClose={() => {
+          setIsReportModalOpen(false)
+          setManualLocation(null) // clear pin when modal closes
+        }}
         userLocation={userLocation}
+        selectedLocation={manualLocation}
+        onPinOnMap={() => {
+          setIsReportModalOpen(false)  // close modal
+          setIsSelectingLocation(true) // enter map selection mode
+        }}
       />
     </div>
   )
