@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Safety Colors */
+  --danger-red: #DC2626;
+  --safe-green: #059669;
+  --warning-orange: #D97706;
+  --trust-blue: #1D4ED8;
+  --glass-alert: rgba(255, 255, 255, 0.95);
+  
+  /* Emergency Gradients */
+  --gradient-emergency: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+  --gradient-safe: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  --gradient-warning: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+}
+
+/* Glass Morphism */
+.glass-alert {
+  backdrop-filter: blur(24px) saturate(180%);
+  background: var(--glass-alert);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Emergency Button */
+.emergency-button {
+  background: var(--gradient-emergency);
+  color: white;
+  font-weight: bold;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.emergency-button:hover {
+  transform: scale(1.05);
+}
+
+.emergency-button:hover {
+  box-shadow: 0 0 40px rgba(220, 38, 38, 0.6);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Panic Pulse Animation */
+.panic-pulse {
+  animation: panicPulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes panicPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(220, 38, 38, 0);
+  }
+}
+
+/* Incident Ping */
+.incident-ping {
+  animation: incidentPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes incidentPing {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Emergency Glow */
+.emergency-glow {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.6),
+              0 0 40px rgba(220, 38, 38, 0.4),
+              0 0 60px rgba(220, 38, 38, 0.2);
+}
+
+/* Safe Zone Gradient */
+.safe-zone {
+  background: var(--gradient-safe);
+}
+
+/* Danger Zone Gradient */
+.danger-zone {
+  background: var(--gradient-emergency);
+}
+
+/* Hover Lift Effect */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
