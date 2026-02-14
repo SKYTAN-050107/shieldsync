@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { trackEvent } from '../services/firebase'
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { auth, trackEvent } from '../services/firebase'
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -18,15 +19,11 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            // TODO: Connect with Firebase Auth
-            // import { signInWithEmailAndPassword } from 'firebase/auth'
-            // import { auth } from '../services/firebase'
-            // await signInWithEmailAndPassword(auth, email, password)
-
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await signInWithEmailAndPassword(auth, email, password)
             trackEvent('login_success', { method: 'email' })
             navigate('/dashboard')
         } catch (err) {
+            console.error('Login error:', err)
             setError('Invalid email or password. Please try again.')
             trackEvent('login_failed')
         } finally {
@@ -34,12 +31,23 @@ export default function LoginPage() {
         }
     }
 
-    const handleSocialLogin = (provider) => {
-        // TODO: Connect with Firebase Social Auth
-        // import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-        console.log('Social login with:', provider)
-        trackEvent('social_login_attempt', { provider })
-        navigate('/dashboard')
+    const handleSocialLogin = async (provider) => {
+        setIsLoading(true)
+        setError('')
+        try {
+            if (provider === 'google') {
+                const googleProvider = new GoogleAuthProvider()
+                await signInWithPopup(auth, googleProvider)
+                trackEvent('social_login_success', { provider })
+                navigate('/dashboard')
+            }
+        } catch (err) {
+            console.error('Social login error:', err)
+            setError('Failed to login with Google. Please try again.')
+            trackEvent('social_login_failed', { provider })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (

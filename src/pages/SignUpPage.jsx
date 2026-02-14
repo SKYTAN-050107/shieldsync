@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { trackEvent } from '../services/firebase'
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { auth, trackEvent } from '../services/firebase'
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -31,28 +32,37 @@ export default function SignUpPage() {
         setIsLoading(true)
 
         try {
-            // TODO: Connect with Firebase Auth
-            // import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-            // import { auth } from '../services/firebase'
-            // const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-            // await updateProfile(userCredential.user, { displayName: name })
-
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+            await updateProfile(userCredential.user, { displayName: name })
+            
             trackEvent('signup_success', { method: 'email' })
             navigate('/dashboard')
         } catch (err) {
-            setError('Failed to create account. Please try again.')
+            console.error('Signup error:', err)
+            setError(err.message || 'Failed to create account. Please try again.')
             trackEvent('signup_failed')
         } finally {
             setIsLoading(false)
         }
     }
 
-    const handleSocialSignUp = (provider) => {
-        // TODO: Connect with Firebase Social Auth
-        console.log('Social sign up with:', provider)
-        trackEvent('social_signup_attempt', { provider })
-        navigate('/dashboard')
+    const handleSocialSignUp = async (provider) => {
+        setIsLoading(true)
+        setError('')
+        try {
+            if (provider === 'google') {
+                const googleProvider = new GoogleAuthProvider()
+                await signInWithPopup(auth, googleProvider)
+                trackEvent('social_signup_success', { provider })
+                navigate('/dashboard')
+            }
+        } catch (err) {
+            console.error('Social signup error:', err)
+            setError('Failed to sign up with Google. Please try again.')
+            trackEvent('social_signup_failed', { provider })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (

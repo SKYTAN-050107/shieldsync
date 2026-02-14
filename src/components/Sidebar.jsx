@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { signOut, onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../services/firebase'
 import { useIsMobile } from '../hooks/useIsMobile'
 import {
     Home, Map, FileText, Users, Settings,
-    X, Menu, Shield, ChevronLeft
+    X, Menu, Shield, ChevronLeft, LogOut
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -18,8 +20,26 @@ const NAV_ITEMS = [
 export default function Sidebar() {
     const isMobile = useIsMobile()
     const location = useLocation()
+    const navigate = useNavigate()
     const [mobileOpen, setMobileOpen] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
+    const [user, setUser] = useState(null)
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser)
+        })
+        return () => unsubscribe()
+    }, [])
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth)
+            navigate('/login')
+        } catch (error) {
+            console.error('Logout error:', error)
+        }
+    }
 
     const sidebarWidth = collapsed ? 72 : 256
 
@@ -89,21 +109,38 @@ export default function Sidebar() {
             {/* Footer */}
             <div className={`px-4 py-4 border-t border-white/[0.06] ${collapsed ? 'px-3' : ''}`}>
                 {!collapsed && (
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center flex-shrink-0">
-                            <Shield size={16} className="text-white" />
+                    <div className="flex items-center justify-between gap-3 px-2">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center flex-shrink-0">
+                                <Shield size={16} className="text-white" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-sm font-bold text-white/80 truncate">
+                                    {user?.displayName || (user?.email?.split('@')[0]) || 'JB Resident'}
+                                </p>
+                                <p className="text-[11px] text-white/30 truncate">Johor Bahru</p>
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                            <p className="text-sm font-bold text-white/80 truncate">JB Resident</p>
-                            <p className="text-[11px] text-white/30 truncate">Johor Bahru</p>
-                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+                            title="Log Out"
+                        >
+                            <LogOut size={18} />
+                        </button>
                     </div>
                 )}
                 {collapsed && (
-                    <div className="flex justify-center">
+                    <div className="flex flex-col items-center gap-4">
                         <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center">
                             <Shield size={16} className="text-white" />
                         </div>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+                        >
+                            <LogOut size={18} />
+                        </button>
                     </div>
                 )}
             </div>
