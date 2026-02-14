@@ -95,7 +95,7 @@ export default function LandingPage() {
                                 ShieldSync
                             </span>
                             <span className="hidden sm:inline text-white/20 font-medium text-sm ml-2">
-                                Johor Bahru
+                                Malaysia
                             </span>
                         </div>
                     </div>
@@ -226,7 +226,7 @@ export default function LandingPage() {
                         Everything You Need
                     </h2>
                     <p className="text-white/30 text-base max-w-lg mx-auto">
-                        A comprehensive safety platform for the residents of Johor Bahru.
+                        A comprehensive safety platform for the Malaysia citizens.
                     </p>
                 </motion.div>
 
@@ -304,7 +304,7 @@ export default function LandingPage() {
                         </span>
                     </div>
                     <p className="text-xs text-white/15">
-                        Made for the safety of Johor Bahru residents
+                        Made for the safety of Malaysia citizens. Developed by Sky. All rights reserved.
                     </p>
                 </div>
             </footer>
