@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import {
     Shield, MapPin, AlertTriangle, Users, ArrowRight,
     Phone, Zap, Lock, Eye
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const FEATURES = [
     {
@@ -12,7 +13,12 @@ const FEATURES = [
         desc: 'Find nearest police, fire stations & hospitals instantly with one-tap calling.',
         color: 'text-primary-400',
         bg: 'bg-primary-500/10',
-        border: 'border-primary-500/20'
+        border: 'border-primary-500/20',
+        details: [
+            'One-tap dialing to 999/994 from the app.',
+            'Shows nearest police, fire, and hospitals.',
+            'Shares your GPS with responders when allowed.'
+        ]
     },
     {
         icon: MapPin,
@@ -20,7 +26,12 @@ const FEATURES = [
         desc: 'Real-time safety map with incident markers and service locations.',
         color: 'text-accent-400',
         bg: 'bg-accent-500/10',
-        border: 'border-accent-500/20'
+        border: 'border-accent-500/20',
+        details: [
+            'Live incidents, services, and legend clarity.',
+            'Pan, zoom, and reset view for easy navigation.',
+            'Tap pins to see contact options and details.'
+        ]
     },
     {
         icon: AlertTriangle,
@@ -28,7 +39,12 @@ const FEATURES = [
         desc: 'Report crimes, accidents & hazards anonymously to keep your community safe.',
         color: 'text-warning-400',
         bg: 'bg-warning-500/10',
-        border: 'border-warning-500/20'
+        border: 'border-warning-500/20',
+        details: [
+            'Submit anonymous reports with location.',
+            'Categorize hazards, crimes, and accidents.',
+            'Send quickly to local coordinators.'
+        ]
     },
     {
         icon: Users,
@@ -36,7 +52,12 @@ const FEATURES = [
         desc: 'Join neighborhood watch groups and coordinate with your community.',
         color: 'text-safe-400',
         bg: 'bg-safe-500/10',
-        border: 'border-safe-500/20'
+        border: 'border-safe-500/20',
+        details: [
+            'Find nearby groups and request to join.',
+            'Chat and coordinate with neighbors.',
+            'Receive alerts from your watch group.'
+        ]
     },
 ]
 
@@ -49,6 +70,7 @@ const STATS = [
 
 export default function LandingPage() {
     const navigate = useNavigate()
+    const [openFeature, setOpenFeature] = useState(null)
 
     return (
         <div className="min-h-screen bg-surface-900 relative overflow-hidden">
@@ -211,6 +233,7 @@ export default function LandingPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {FEATURES.map((feature, i) => {
                         const Icon = feature.icon
+                        const isOpen = openFeature === i
                         return (
                             <motion.div
                                 key={feature.title}
@@ -218,19 +241,49 @@ export default function LandingPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.7 + i * 0.1 }}
                                 className={`glass-card rounded-2xl p-7 border ${feature.border}
-                           hover-glow transition-all group cursor-pointer`}
-                                onClick={() => navigate('/dashboard')}
+                           hover-glow transition-all group cursor-pointer relative overflow-hidden
+                           ${isOpen ? 'border-white/20 bg-white/[0.06]' : ''}`}
+                                onClick={() => setOpenFeature(isOpen ? null : i)}
+                                aria-expanded={isOpen}
                             >
-                                <div className={`h-12 w-12 rounded-xl ${feature.bg} flex items-center justify-center mb-5
-                               group-hover:scale-110 transition-transform`}>
-                                    <Icon size={24} className={feature.color} />
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className={`h-12 w-12 rounded-xl ${feature.bg} flex items-center justify-center
+                                   group-hover:scale-110 transition-transform`}>
+                                        <Icon size={24} className={feature.color} />
+                                    </div>
+                                    <motion.span
+                                        animate={{ rotate: isOpen ? 90 : 0, opacity: 0.6 }}
+                                        className="text-white/50 text-sm font-bold"
+                                    >
+                                        ▶
+                                    </motion.span>
                                 </div>
-                                <h3 className="text-lg font-bold text-white mb-2">
+                                <h3 className="text-lg font-bold text-white mt-4 mb-2">
                                     {feature.title}
                                 </h3>
                                 <p className="text-white/35 text-sm leading-relaxed">
                                     {feature.desc}
                                 </p>
+
+                                <AnimatePresence initial={false}>
+                                    {isOpen && (
+                                        <motion.ul
+                                            key="details"
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="mt-4 space-y-2 text-white/50 text-sm"
+                                        >
+                                            {feature.details.map((line) => (
+                                                <li key={line} className="flex items-start gap-2">
+                                                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white/30" />
+                                                    <span>{line}</span>
+                                                </li>
+                                            ))}
+                                        </motion.ul>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         )
                     })}

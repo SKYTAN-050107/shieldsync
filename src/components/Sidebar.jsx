@@ -17,12 +17,11 @@ const NAV_ITEMS = [
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ collapsed, setCollapsed }) {
     const isMobile = useIsMobile()
     const location = useLocation()
     const navigate = useNavigate()
     const [mobileOpen, setMobileOpen] = useState(false)
-    const [collapsed, setCollapsed] = useState(false)
     const [user, setUser] = useState(null)
 
     useEffect(() => {
@@ -35,7 +34,7 @@ export default function Sidebar() {
     const handleLogout = async () => {
         try {
             await signOut(auth)
-            navigate('/login')
+            navigate('/')
         } catch (error) {
             console.error('Logout error:', error)
         }

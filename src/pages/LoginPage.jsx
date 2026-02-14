@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth, trackEvent } from '../services/firebase'
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function LoginPage() {
@@ -53,6 +53,15 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #0a0f1e 0%, #111827 50%, #0a1628 100%)' }}>
+
+            {/* Back to Landing */}
+            <button
+                onClick={() => navigate('/')}
+                className="absolute top-4 left-4 z-20 h-10 px-3 rounded-full bg-white/10 border border-white/15 text-white/80 flex items-center gap-2 hover:bg-white/15 transition"
+            >
+                <ArrowLeft size={16} />
+                <span className="text-sm font-semibold">Back</span>
+            </button>
 
             {/* Dark overlay gradient */}
             <div className="absolute inset-0"

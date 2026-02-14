@@ -49,9 +49,16 @@ export default function HomeScreen() {
     }
   }
 
-  const handlePanicButton = () => {
+  // Emergency call numbers
+  const MALAYSIA_POLICE = '999'
+  const BOMBA = '994'
+  // Expand state
+  const [showEmergencyOptions, setShowEmergencyOptions] = useState(false)
+  // Handle call
+  const handleEmergencyCall = (number) => {
     trackEvent('panic_button_pressed')
-    window.location.href = 'tel:999'
+    window.location.href = `tel:${number}`
+    setShowEmergencyOptions(false)
   }
 
   if (loading) {
@@ -210,19 +217,42 @@ export default function HomeScreen() {
         </motion.div>
       </div>
 
-      {/* Floating Panic Button */}
-      <motion.button
-        onClick={handlePanicButton}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-8 right-8 z-50 h-18 w-18 
-                   bg-gradient-to-br from-danger-500 to-danger-700 
-                   rounded-full flex items-center justify-center 
-                   panic-pulse border-2 border-danger-400/30"
-        style={{ width: '72px', height: '72px' }}
-      >
-        <Phone size={28} className="text-white" />
-      </motion.button>
+      {/* Floating Emergency Call Button */}
+      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
+        {showEmergencyOptions && (
+          <div className="mb-2 flex flex-col gap-2">
+            <button
+              className="w-56 px-4 py-3 rounded-xl bg-danger-600 text-white font-bold flex items-center gap-3 shadow-lg border border-danger-400/30 transition hover:bg-danger-700"
+              onClick={() => handleEmergencyCall(MALAYSIA_POLICE)}
+            >
+              <Phone size={22} className="text-white" /> Malaysia Police (999)
+            </button>
+            {nearest.hospital && (
+              <button
+                className="w-56 px-4 py-3 rounded-xl bg-safe-600 text-white font-bold flex items-center gap-3 shadow-lg border border-safe-400/30 transition hover:bg-safe-700"
+                onClick={() => handleEmergencyCall(nearest.hospital.phone)}
+              >
+                <Phone size={22} className="text-white" /> Nearest Hospital ({nearest.hospital.phone})
+              </button>
+            )}
+            <button
+              className="w-56 px-4 py-3 rounded-xl bg-warning-600 text-white font-bold flex items-center gap-3 shadow-lg border border-warning-400/30 transition hover:bg-warning-700"
+              onClick={() => handleEmergencyCall(BOMBA)}
+            >
+              <Phone size={22} className="text-white" /> Bomba (994)
+            </button>
+          </div>
+        )}
+        <motion.button
+          onClick={() => setShowEmergencyOptions(v => !v)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="h-18 w-18 bg-gradient-to-br from-danger-500 to-danger-700 rounded-full flex items-center justify-center panic-pulse border-2 border-danger-400/30 shadow-lg"
+          style={{ width: '72px', height: '72px' }}
+        >
+          <Phone size={28} className="text-white" />
+        </motion.button>
+      </div>
     </div>
   )
 }
