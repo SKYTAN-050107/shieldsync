@@ -24,15 +24,16 @@ Built with React 19, Firebase, Leaflet (OpenStreetMap), and Google Gemini AI.
 
 This is a solo sprint hackathon that made in single day development.
 
-This application was built with AI assistance using agent in planning in Antigravity and Visual Studio Code as secondary text editor ,AI agent model used(Claude Opus 4.6).
+This application was built with AI assistance using agent in planning in Antigravity and Visual Studio Code as secondary text editor ,AI agent model used(Claude Opus 4.6), GEMINI 3 flash & GEMINI 3 pro.
+
 The AI assisted with:
-Raw plan organizing
-Code generation for quick frontend code 
-Searching unknown(silent) bugs
-Assist in solving unknown bugs
-Tailwind CSS styling
-Organized and structured plan is used for generation of codes. All codes are reviewed ,read ,and validated by solo developer.
-AI is an assistant in structuring large volume of plans for developer but not autonomous agent that thinks and build by it owns.
+- Raw plan organizing
+- Code generation for quick frontend code 
+- Searching unknown(silent) bugs
+- Assist in solving unknown bugs
+- Tailwind CSS styling
+- Organized and structured plan is used for generation of codes. All codes are reviewed ,read ,and validated by solo developer.
+- AI is an assistant in structuring large volume of plans for developer but not autonomous agent that thinks and build by it owns.
 
 ---
 
