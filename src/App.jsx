@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import HomeScreen from './screens/HomeScreen'
-import SafetyMapScreen from './screens/SafetyMapScreen'
-import WatchGroupScreen from './screens/WatchGroupScreen'
+import HomeScreen from './pages/HomeScreen'
+import SafetyMapScreen from './pages/SafetyMapScreen'
+import WatchGroupScreen from './pages/WatchGroupScreen'
 import MobileNav from './components/MobileNav'
-import './App.css'
+import './styles/app.css'
 
 function App() {
   return (

@@ -1,82 +1,88 @@
 // src/components/SafetyMap.jsx
 import { calculateDistance } from '../utils/haversine'
 
-export default function SafetyMap({ 
-  userLocation, 
-  emergencyServices = [], 
+export default function SafetyMap({
+  userLocation,
+  emergencyServices = [],
   incidents = [],
   onSelectService,
-  onSelectIncident 
+  onSelectIncident
 }) {
   const mapWidth = 500
   const mapHeight = 500
-  
+
   const toSVGCoords = (lat, lon) => {
     if (!userLocation) return { x: mapWidth / 2, y: mapHeight / 2 }
-    
+
     const centerLat = userLocation.lat
     const centerLon = userLocation.lon
-    const scale = 8000 // Adjust zoom level
-    
+    const scale = 8000
+
     return {
       x: (lon - centerLon) * scale + mapWidth / 2,
       y: (centerLat - lat) * scale + mapHeight / 2
     }
   }
-  
+
   const getServiceColor = (type) => {
     const colors = {
-      police: '#1D4ED8',   // trust-blue
-      fire: '#D97706',     // warning-orange
-      hospital: '#059669'  // safe-green
+      police: '#3b82f6',   // primary-500
+      fire: '#d97706',     // warning-600
+      hospital: '#10b981'  // safe-500
     }
     return colors[type] || colors.police
   }
-  
+
   const getServiceIcon = (type) => {
     const icons = {
-      police: '🚓',
-      fire: '🚒',
+      police: '🛡',
+      fire: '🔥',
       hospital: '🏥'
     }
     return icons[type] || '📍'
   }
-  
+
   if (!userLocation) {
     return (
-      <div className="w-full h-96 bg-gray-100 rounded-2xl flex items-center justify-center">
-        <p className="text-gray-500 font-bold uppercase tracking-widest animate-pulse">Loading map...</p>
+      <div className="w-full h-full bg-surface-900 flex items-center justify-center">
+        <p className="text-white/30 font-bold uppercase tracking-widest animate-pulse">Loading map...</p>
       </div>
     )
   }
-  
+
   return (
-    <svg 
+    <svg
       viewBox={`0 0 ${mapWidth} ${mapHeight}`}
-      className="w-full h-full bg-gradient-to-br from-gray-50 to-blue-50
-                 rounded-2xl shadow-2xl border-2 border-gray-200"
+      className="w-full h-full"
+      style={{ background: 'linear-gradient(180deg, #0d1321 0%, #111827 50%, #0f172a 100%)' }}
     >
       {/* Grid Background */}
       <defs>
         <pattern id="safety-grid" width="50" height="50" patternUnits="userSpaceOnUse">
-          <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+          <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
         </pattern>
-        
+
         {/* Danger Zone Gradient */}
         <radialGradient id="danger-zone">
-          <stop offset="0%" stopColor="#DC2626" stopOpacity="0.4" />
+          <stop offset="0%" stopColor="#DC2626" stopOpacity="0.25" />
           <stop offset="100%" stopColor="#DC2626" stopOpacity="0" />
         </radialGradient>
-        
+
         {/* Safe Zone Gradient */}
         <radialGradient id="safe-zone">
-          <stop offset="0%" stopColor="#059669" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#059669" stopOpacity="0" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+        </radialGradient>
+
+        {/* User Pin Glow */}
+        <radialGradient id="user-glow">
+          <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
         </radialGradient>
       </defs>
-      
+
       <rect width={mapWidth} height={mapHeight} fill="url(#safety-grid)" />
-      
+
       {/* Danger Zones (Incident Clusters) */}
       {incidents.map((incident, i) => {
         const coords = toSVGCoords(incident.lat, incident.lon)
@@ -91,7 +97,7 @@ export default function SafetyMap({
           />
         )
       })}
-      
+
       {/* Safe Zones (Near Police Stations) */}
       {emergencyServices
         .filter(s => s.type === 'police')
@@ -108,13 +114,13 @@ export default function SafetyMap({
             />
           )
         })}
-      
+
       {/* Connection Lines (User to Nearest Services) */}
       {emergencyServices.slice(0, 3).map((service, i) => {
         const userCoords = toSVGCoords(userLocation.lat, userLocation.lon)
         const serviceCoords = toSVGCoords(service.lat, service.lon)
         const color = getServiceColor(service.type)
-        
+
         return (
           <path
             key={`line-${service.id}`}
@@ -123,73 +129,76 @@ export default function SafetyMap({
                   ${Math.min(userCoords.y, serviceCoords.y) - 50}
                   ${serviceCoords.x} ${serviceCoords.y}`}
             stroke={color}
-            strokeWidth="3"
+            strokeWidth="2"
             fill="none"
-            strokeDasharray="8 4"
-            opacity="0.6"
+            strokeDasharray="6 4"
+            opacity="0.35"
           />
         )
       })}
-      
+
       {/* User Pin (YOU) */}
-      <g transform={`translate(${mapWidth/2}, ${mapHeight/2})`}>
-        <circle r="18" fill="#DC2626" className="animate-pulse" />
-        <circle r="14" fill="#FEE2E2" />
-        <text 
-          y="6" 
-          textAnchor="middle" 
-          className="text-sm font-bold fill-danger-700"
-          style={{ fontSize: '12px', fontWeight: 'bold' }}
+      <g transform={`translate(${mapWidth / 2}, ${mapHeight / 2})`}>
+        {/* Glow effect */}
+        <circle r="40" fill="url(#user-glow)" />
+        <circle r="16" fill="#0e7490" opacity="0.5" className="animate-pulse" />
+        <circle r="12" fill="#22d3ee" />
+        <circle r="7" fill="#0a0f1e" />
+        <circle r="4" fill="#22d3ee" />
+        <text
+          y="-22"
+          textAnchor="middle"
+          fill="#22d3ee"
+          style={{ fontSize: '9px', fontWeight: 'bold', letterSpacing: '2px' }}
         >
           YOU
         </text>
       </g>
-      
+
       {/* Emergency Service Pins */}
       {emergencyServices.map((service, i) => {
         const coords = toSVGCoords(service.lat, service.lon)
         const color = getServiceColor(service.type)
         const icon = getServiceIcon(service.type)
-        
+
         return (
-          <g 
+          <g
             key={service.id}
             transform={`translate(${coords.x}, ${coords.y})`}
             className="cursor-pointer hover:scale-125 transition-transform"
             onClick={() => onSelectService?.(service)}
           >
-            {/* Pin Shadow */}
-            <circle r="14" fill="black" opacity="0.2" cy="2" />
-            
+            {/* Pin Outer Glow */}
+            <circle r="18" fill={color} opacity="0.15" />
+
             {/* Pin Body */}
-            <circle r="12" fill={color} className="drop-shadow-lg" />
-            <circle r="8" fill="white" opacity="0.4" />
-            
+            <circle r="12" fill={color} opacity="0.9" />
+            <circle r="8" fill={`${color}55`} />
+
             {/* Number Badge */}
-            <circle cx="14" cy="-14" r="10" fill="white" stroke={color} strokeWidth="2" />
-            <text 
-              x="14" 
-              y="-10" 
+            <circle cx="14" cy="-14" r="9" fill="#0a0f1e" stroke={color} strokeWidth="2" />
+            <text
+              x="14"
+              y="-10"
               textAnchor="middle"
-              className="text-xs font-bold"
               fill={color}
-              style={{ fontSize: '10px', fontWeight: 'bold' }}
+              style={{ fontSize: '9px', fontWeight: 'bold' }}
             >
               {i + 1}
             </text>
-            
-            {/* Type Emoji (Optional visual) */}
+
+            {/* Type Emoji */}
             <text y="5" textAnchor="middle" style={{ fontSize: '10px' }}>
-                {icon[0]}
+              {icon[0]}
             </text>
           </g>
         )
       })}
-      
+
       {/* Incident Markers */}
       {incidents.map((incident, i) => {
         const coords = toSVGCoords(incident.lat, incident.lon)
-        
+
         return (
           <g
             key={incident.id}
@@ -198,50 +207,52 @@ export default function SafetyMap({
             onClick={() => onSelectIncident?.(incident)}
           >
             {/* Pulsing Alert Ring */}
-            <circle 
-              r="16" 
-              fill="none" 
-              stroke="#DC2626" 
-              strokeWidth="2"
+            <circle
+              r="16"
+              fill="none"
+              stroke="#DC2626"
+              strokeWidth="1.5"
               className="animate-ping"
+              opacity="0.5"
             />
-            
+
             {/* Warning Icon */}
-            <circle r="10" fill="#DC2626" />
-            <circle r="6" fill="#FEE2E2" opacity="0.8" />
-            <text 
-              y="4" 
+            <circle r="10" fill="#DC2626" opacity="0.8" />
+            <circle r="6" fill="#0a0f1e" opacity="0.5" />
+            <text
+              y="4"
               textAnchor="middle"
-              style={{ fontSize: '12px' }}
+              style={{ fontSize: '10px' }}
             >
               ⚠️
             </text>
           </g>
         )
       })}
-      
+
       {/* Legend */}
       <g transform="translate(15, 15)">
-        <rect width="150" height="110" fill="white" opacity="0.95" rx="8" />
-        
-        <circle cx="25" cy="25" r="6" fill="#1D4ED8" />
-        <text x="40" y="29" className="text-xs fill-gray-700" style={{ fontSize: '11px' }}>
+        <rect width="140" height="105" fill="#0a0f1e" opacity="0.85" rx="10"
+          stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+
+        <circle cx="24" cy="24" r="5" fill="#3b82f6" />
+        <text x="38" y="28" fill="rgba(255,255,255,0.5)" style={{ fontSize: '10px', fontWeight: '500' }}>
           Police Station
         </text>
-        
-        <circle cx="25" cy="45" r="6" fill="#D97706" />
-        <text x="40" y="49" className="text-xs fill-gray-700" style={{ fontSize: '11px' }}>
+
+        <circle cx="24" cy="44" r="5" fill="#d97706" />
+        <text x="38" y="48" fill="rgba(255,255,255,0.5)" style={{ fontSize: '10px', fontWeight: '500' }}>
           Fire Station
         </text>
-        
-        <circle cx="25" cy="65" r="6" fill="#DC2626" />
-        <text x="40" y="69" className="text-xs fill-gray-700" style={{ fontSize: '11px' }}>
+
+        <circle cx="24" cy="64" r="5" fill="#DC2626" />
+        <text x="38" y="68" fill="rgba(255,255,255,0.5)" style={{ fontSize: '10px', fontWeight: '500' }}>
           Incident
         </text>
-        
-        <circle cx="25" cy="85" r="6" fill="#059669" opacity="0.5" />
-        <text x="40" y="89" className="text-xs fill-gray-700" style={{ fontSize: '11px' }}>
-          Safe Zone
+
+        <circle cx="24" cy="84" r="5" fill="#22d3ee" />
+        <text x="38" y="88" fill="rgba(255,255,255,0.5)" style={{ fontSize: '10px', fontWeight: '500' }}>
+          Your Location
         </text>
       </g>
     </svg>

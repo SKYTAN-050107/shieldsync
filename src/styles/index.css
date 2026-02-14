@@ -1,7 +1,41 @@
 @import "tailwindcss";
-@import './styles/design-system.css';
+@import './design-system.css';
 
 @theme {
+  /* Primary - Blue/Cyan from logo */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* Cyan accent from logo */
+  --color-accent-50: #ecfeff;
+  --color-accent-100: #cffafe;
+  --color-accent-200: #a5f3fc;
+  --color-accent-300: #67e8f9;
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+  --color-accent-700: #0e7490;
+  --color-accent-800: #155e75;
+  --color-accent-900: #164e63;
+
+  /* Emerald accent from logo crystals */
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+
+  /* Danger red for emergency */
   --color-danger-50: #fef2f2;
   --color-danger-100: #fee2e2;
   --color-danger-200: #fecaca;
@@ -13,6 +47,7 @@
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
 
+  /* Safe green */
   --color-safe-50: #ecfdf5;
   --color-safe-100: #d1fae5;
   --color-safe-200: #a7f3d0;
@@ -24,6 +59,7 @@
   --color-safe-800: #065f46;
   --color-safe-900: #064e3b;
 
+  /* Warning orange */
   --color-warning-50: #fffbeb;
   --color-warning-100: #fef3c7;
   --color-warning-200: #fde68a;
@@ -35,6 +71,7 @@
   --color-warning-800: #92400e;
   --color-warning-900: #78350f;
 
+  /* Trust blue */
   --color-trust-50: #eff6ff;
   --color-trust-100: #dbeafe;
   --color-trust-200: #bfdbfe;
@@ -46,6 +83,13 @@
   --color-trust-800: #1e3a8a;
   --color-trust-900: #1e3a8a;
 
+  /* Dark surfaces */
+  --color-surface-900: #0a0f1e;
+  --color-surface-800: #111827;
+  --color-surface-700: #1a2236;
+  --color-surface-600: #1f2b45;
+  --color-surface-500: #263354;
+
   --font-montserrat: 'Montserrat', sans-serif;
   --font-inter: 'Inter', sans-serif;
 }
@@ -55,9 +99,8 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(15, 23, 42, 0.87);
-  background-color: #ffffff;
+  color: rgba(255, 255, 255, 0.92);
+  background-color: #0a0f1e;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -69,20 +112,27 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #0a0f1e;
 }
 
 * {
   box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #0f172a;
-  }
-  body {
-    background-color: #0f172a;
-  }
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2563eb44;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb88;
+}
