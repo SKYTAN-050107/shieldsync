@@ -8,7 +8,7 @@ import {
 } from '../services/emergencyService'
 import { trackEvent } from '../services/firebase'
 import EmergencyCard from '../components/EmergencyCard'
-import { Shield, MapPin, AlertTriangle, Phone, Map, FileWarning, ChevronRight } from 'lucide-react'
+import { Shield, MapPin, AlertTriangle, Phone, Map, FileWarning, ChevronRight, Activity } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function HomeScreen() {
@@ -143,13 +143,13 @@ export default function HomeScreen() {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => navigate('/dashboard/report')}
+          onClick={() => navigate('/dashboard/activity')}
           className="py-4 rounded-2xl flex items-center justify-center gap-2.5
-                     bg-gradient-to-r from-warning-600 to-warning-500 text-white font-bold text-sm tracking-wide
-                     shadow-lg shadow-warning-600/20"
+                     bg-gradient-to-r from-accent-600 to-accent-500 text-white font-bold text-sm tracking-wide
+                     shadow-lg shadow-accent-600/20"
         >
-          <FileWarning size={18} />
-          Report Incident
+          <Activity size={18} />
+          View Activity
         </motion.button>
       </div>
 
