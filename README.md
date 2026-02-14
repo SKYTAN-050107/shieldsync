@@ -1,6 +1,6 @@
 # ShieldSync
 
-**Real-Time Community Safety Platform for Johor Bahru**
+**Real-Time Community Safety Platform for Malaysia**
 
 <div align="center">
 
@@ -21,6 +21,8 @@
 ShieldSync is a web-based public safety application that empowers residents of Johor Bahru to report incidents, locate emergency services, receive AI-driven safety insights, and coordinate neighbourhood watch groups — all in real time.
 
 Built with React 19, Firebase, Leaflet (OpenStreetMap), and Google Gemini AI.
+
+This is a solo sprint hackathon that made in single day development.
 
 ---
 
