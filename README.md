@@ -2,6 +2,22 @@
 
 **Real-Time Community Safety Platform for Johor Bahru**
 
+<div align="center">
+
+### 🎬 Demo Video
+
+<a href="https://drive.google.com/file/d/1mOb5Wg33yteVTV8ULIOg6opBUqCGHl90/view?usp=sharing">
+  <img src="https://drive.google.com/thumbnail?id=1mOb5Wg33yteVTV8ULIOg6opBUqCGHl90&sz=w1280" alt="ShieldSync Demo Video" width="720" />
+</a>
+
+<p><strong>▶ Click the image above to watch the full demo</strong></p>
+
+[![Watch Demo](https://img.shields.io/badge/▶_Watch_Demo-Google_Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1mOb5Wg33yteVTV8ULIOg6opBUqCGHl90/view?usp=sharing)
+
+</div>
+
+---
+
 ShieldSync is a web-based public safety application that empowers residents of Johor Bahru to report incidents, locate emergency services, receive AI-driven safety insights, and coordinate neighbourhood watch groups — all in real time.
 
 Built with React 19, Firebase, Leaflet (OpenStreetMap), and Google Gemini AI.
