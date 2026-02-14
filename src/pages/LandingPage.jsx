@@ -78,17 +78,26 @@ export default function LandingPage() {
                         </div>
                     </div>
 
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/dashboard')}
-                        className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-accent-500 
-                       text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-600/20
-                       flex items-center gap-2"
-                    >
-                        Open Dashboard
-                        <ArrowRight size={16} />
-                    </motion.button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="px-5 py-2.5 text-white/60 hover:text-white font-semibold text-sm 
+                                     transition-colors"
+                        >
+                            Login
+                        </button>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/signup')}
+                            className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-accent-500 
+                                     text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-600/20
+                                     flex items-center gap-2"
+                        >
+                            Get Started
+                            <ArrowRight size={16} />
+                        </motion.button>
+                    </div>
                 </div>
             </header>
 
