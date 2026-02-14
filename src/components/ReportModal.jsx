@@ -183,18 +183,18 @@ export default function ReportModal({ isOpen, onClose, userLocation, selectedLoc
                         Location
                       </label>
                       <div className="flex items-center gap-2">
-                        <div className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium ${
+                        <div className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium min-w-0 ${
                           isUsingPin
                             ? 'bg-accent-500/10 border-accent-500/30 text-accent-300'
                             : 'bg-white/[0.04] border-white/10 text-white/50'
                         }`}>
                           {isUsingPin ? (
-                            <><MapPin size={14} className="text-accent-400" />
-                              <span>Pinned: {effectiveLocation.lat.toFixed(4)}, {effectiveLocation.lon.toFixed(4)}</span>
+                            <><MapPin size={14} className="text-accent-400 flex-shrink-0" />
+                              <span className="truncate">Pinned: {effectiveLocation.lat.toFixed(4)}, {effectiveLocation.lon.toFixed(4)}</span>
                             </>
                           ) : (
-                            <><Navigation size={14} className="text-primary-400" />
-                              <span>Using GPS location</span>
+                            <><Navigation size={14} className="text-primary-400 flex-shrink-0" />
+                              <span className="truncate">Using GPS</span>
                             </>
                           )}
                         </div>
@@ -205,10 +205,10 @@ export default function ReportModal({ isOpen, onClose, userLocation, selectedLoc
                           onClick={() => onPinOnMap?.()}
                           className="px-3 py-2.5 rounded-xl bg-accent-500/15 border border-accent-500/30
                                      text-accent-300 text-xs font-bold hover:bg-accent-500/25 transition-colors
-                                     flex items-center gap-1.5 whitespace-nowrap"
+                                     flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 min-h-[44px]"
                         >
                           <MapPin size={14} />
-                          Pin on Map
+                          Pin
                         </motion.button>
                       </div>
                     </div>

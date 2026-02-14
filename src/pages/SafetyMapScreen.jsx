@@ -122,9 +122,9 @@ export default function SafetyMapScreen() {
       </AnimatePresence>
 
       {/* Top bar: Filter + Report */}
-      <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between gap-2">
+      <div className="absolute top-4 left-14 sm:left-4 right-4 z-50 flex items-center justify-between gap-1.5 sm:gap-2">
         {/* Dynamic Filter Buttons */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-1 sm:gap-1.5 overflow-x-auto">
           {FILTER_OPTIONS.map((f) => {
             const Icon = f.icon
             const isActive = activeFilter === f.id
@@ -132,7 +132,7 @@ export default function SafetyMapScreen() {
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all flex-shrink-0
                   ${isActive
                     ? `${f.activeBg} ${f.color} border border-white/15 shadow-lg`
                     : 'bg-surface-800/80 text-white/40 border border-white/5 hover:bg-white/10'}`}
@@ -149,12 +149,13 @@ export default function SafetyMapScreen() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsReportModalOpen(true)}
-          className="px-5 py-2.5 bg-gradient-to-r from-danger-600 to-danger-500
+          className="px-3 sm:px-5 py-2.5 bg-gradient-to-r from-danger-600 to-danger-500
                      text-white font-bold text-xs rounded-xl shadow-lg shadow-danger-600/30
-                     flex items-center gap-2 flex-shrink-0"
+                     flex items-center gap-1.5 sm:gap-2 flex-shrink-0"
         >
           <AlertTriangle size={14} />
-          REPORT
+          <span className="hidden sm:inline">REPORT</span>
+          <span className="sm:hidden">!</span>
         </motion.button>
       </div>
 
@@ -166,7 +167,7 @@ export default function SafetyMapScreen() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", damping: 25 }}
-            className="absolute bottom-28 inset-x-4 z-40"
+            className="absolute bottom-20 sm:bottom-28 inset-x-4 z-40"
           >
             <div className="relative">
               <button
@@ -199,7 +200,7 @@ export default function SafetyMapScreen() {
       </AnimatePresence>
 
       {/* Quick Stats Overlay */}
-      <div className="absolute top-20 left-6 z-10 flex flex-col gap-2">
+      <div className="absolute top-16 sm:top-20 left-4 sm:left-6 z-10 flex flex-col gap-2">
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}

@@ -94,7 +94,7 @@ export default function ActivityDashboardScreen() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-6 pt-12 md:pt-0"
       >
         <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">Activity Dashboard</h1>
         <p className="text-sm text-white/30 font-medium">Track your impact & earn rewards</p>
@@ -209,13 +209,13 @@ export default function ActivityDashboardScreen() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsReportModalOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full
+        className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 h-12 w-12 sm:h-14 sm:w-14 rounded-full
                    bg-gradient-to-br from-danger-600 to-danger-500
                    text-white shadow-lg shadow-danger-600/30
                    flex items-center justify-center
                    border-2 border-danger-400/30"
       >
-        <Plus size={24} />
+        <Plus size={22} />
       </motion.button>
 
       {/* Report Modal */}

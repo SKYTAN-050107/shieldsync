@@ -77,20 +77,20 @@ export default function WatchGroupScreen() {
         return (
             <div className="min-h-screen bg-surface-900 flex flex-col relative z-20">
                 {/* Chat Header */}
-                <div className="glass-card-bright sticky top-0 z-30 px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="glass-card-bright sticky top-0 z-30 px-3 md:px-4 py-3 md:py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
                         <button 
                             onClick={() => setSelectedGroup(null)}
-                            className="p-2 rounded-lg hover:bg-white/5 text-white/60 hover:text-white"
+                            className="p-2 rounded-lg hover:bg-white/5 text-white/60 hover:text-white flex-shrink-0"
                         >
                             <ChevronLeft size={20} />
                         </button>
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-xl bg-primary-600/20 flex items-center justify-center">
-                                <MessageSquare size={20} className="text-primary-400" />
+                        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                            <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary-600/20 flex items-center justify-center flex-shrink-0">
+                                <MessageSquare size={18} className="text-primary-400" />
                             </div>
-                            <div>
-                                <h2 className="text-white font-bold leading-none mb-1">{selectedGroup.name}</h2>
+                            <div className="min-w-0">
+                                <h2 className="text-white font-bold text-sm md:text-base leading-none mb-1 truncate">{selectedGroup.name}</h2>
                                 <p className="text-[10px] text-accent-400 font-bold uppercase tracking-widest flex items-center gap-2">
                                     <span className="h-1.5 w-1.5 rounded-full bg-accent-400 animate-pulse" />
                                     {selectedGroup.members} Members Online
@@ -171,23 +171,23 @@ export default function WatchGroupScreen() {
                 <div className="absolute inset-0 bg-gradient-to-br from-surface-700 via-surface-800 to-surface-900" />
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl" />
 
-                <div className="relative px-6 pt-12 pb-10">
+                <div className="relative px-6 pt-16 md:pt-12 pb-10">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-10 w-10 rounded-xl bg-primary-500/15 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-primary-500/15 flex items-center justify-center flex-shrink-0">
                             <ShieldCheck size={22} className="text-primary-400" />
                         </div>
-                        <div>
-                            <h1 className="font-montserrat font-black text-3xl text-white">
+                        <div className="min-w-0">
+                            <h1 className="font-montserrat font-black text-2xl md:text-3xl text-white">
                                 WATCH GROUPS
                             </h1>
-                            <p className="text-white/30 text-sm font-medium">Protect your neighborhood together</p>
+                            <p className="text-white/30 text-xs md:text-sm font-medium">Protect your neighborhood together</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="px-6 -mt-5 flex gap-2 relative z-10 scrollbar-hide overflow-x-auto pb-2">
+            <div className="px-4 md:px-6 -mt-5 flex gap-2 relative z-10 scrollbar-hide overflow-x-auto pb-2">
                 {['nearby', 'my groups', 'discover'].map(tab => {
                     const Icon = tabIcons[tab]
                     return (
@@ -195,7 +195,7 @@ export default function WatchGroupScreen() {
                             key={tab}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap
+                            className={`px-3 md:px-5 py-2.5 rounded-xl font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 md:gap-2 whitespace-nowrap flex-shrink-0
                         ${activeTab === tab
                                     ? 'bg-gradient-to-r from-primary-600 to-accent-500 text-white shadow-lg shadow-primary-600/20'
                                     : 'glass-card text-white/40 hover:text-white/60'}`}
@@ -254,9 +254,9 @@ export default function WatchGroupScreen() {
                                 className="glass-card p-5 rounded-2xl hover-glow transition-all"
                             >
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-bold text-lg text-white">{group.name}</h3>
+                                            <h3 className="font-bold text-base md:text-lg text-white truncate">{group.name}</h3>
                                             {activeTab === 'my groups' && (
                                                 <div className="h-5 w-5 rounded-full bg-accent-500/10 flex items-center justify-center">
                                                     <Zap size={10} className="text-accent-400" />

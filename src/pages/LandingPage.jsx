@@ -100,11 +100,11 @@ export default function LandingPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <button
                             onClick={() => navigate('/login')}
-                            className="px-5 py-2.5 text-white/60 hover:text-white font-semibold text-sm 
-                                     transition-colors"
+                            className="px-3 sm:px-5 py-2.5 text-white/60 hover:text-white font-semibold text-sm 
+                                     transition-colors min-h-[44px]"
                         >
                             Login
                         </button>
@@ -112,11 +112,12 @@ export default function LandingPage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate('/signup')}
-                            className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-accent-500 
+                            className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-primary-600 to-accent-500 
                                      text-white font-bold text-sm rounded-xl shadow-lg shadow-primary-600/20
-                                     flex items-center gap-2"
+                                     flex items-center gap-2 min-h-[44px]"
                         >
-                            Get Started
+                            <span className="hidden sm:inline">Get Started</span>
+                            <span className="sm:hidden">Start</span>
                             <ArrowRight size={16} />
                         </motion.button>
                     </div>

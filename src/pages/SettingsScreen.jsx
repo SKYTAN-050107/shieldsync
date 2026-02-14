@@ -19,7 +19,7 @@ export default function SettingsScreen() {
     return (
         <div className="p-4 md:p-8 max-w-6xl mx-auto">
             {/* Header */}
-            <header className="mb-8">
+            <header className="mb-8 pt-12 md:pt-0">
                 <h1 className="text-3xl font-montserrat font-black text-white tracking-tight">
                     Settings
                 </h1>
