@@ -1,10 +1,12 @@
 import { db, auth, trackEvent } from './firebase'
 import { 
-  collection, addDoc, getDocs, updateDoc, doc,
+  collection, addDoc, getDocs, getDoc, updateDoc, setDoc, doc,
   query, where, orderBy, limit, Timestamp, increment,
   onSnapshot, serverTimestamp
 } from 'firebase/firestore'
 import { signInAnonymously } from 'firebase/auth'
+
+const POINTS_PER_REPORT = 5
 
 /**
  * Ensure user is authenticated (anonymous or signed-in)
@@ -39,11 +41,25 @@ export const submitReport = async (reportData) => {
     longitude: reportData.location?.lon ?? reportData.longitude ?? 103.7414,
     timestamp: serverTimestamp(),
     userId,
+    pointsAwarded: POINTS_PER_REPORT,
   }
 
   console.log('[ShieldSync] Submitting report to Firestore:', report)
 
   const docRef = await addDoc(collection(db, 'incidents'), report)
+
+  // Award points to user profile
+  try {
+    const userRef = doc(db, 'users', userId)
+    await setDoc(userRef, {
+      totalPoints: increment(POINTS_PER_REPORT),
+      incidentCount: increment(1),
+      lastReportAt: serverTimestamp(),
+    }, { merge: true })
+    console.log('[ShieldSync] Awarded', POINTS_PER_REPORT, 'points to user', userId)
+  } catch (err) {
+    console.warn('[ShieldSync] Could not update user points:', err.message)
+  }
 
   console.log('[ShieldSync] Report saved successfully, docId:', docRef.id)
   trackEvent('incident_reported', {
@@ -52,7 +68,7 @@ export const submitReport = async (reportData) => {
     lon: report.longitude,
   })
 
-  return { success: true, id: docRef.id, report }
+  return { success: true, id: docRef.id, report, pointsAwarded: POINTS_PER_REPORT }
 }
 
 /**
@@ -148,5 +164,64 @@ export const upvoteIncident = async (incidentId) => {
   } catch (error) {
     console.error('Upvote error:', error)
     return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Get user stats (points, incident count) from Firestore
+ */
+export const getUserStats = async (userId) => {
+  try {
+    const uid = userId || (auth.currentUser?.uid)
+    if (!uid) return { totalPoints: 0, incidentCount: 0 }
+
+    const userRef = doc(db, 'users', uid)
+    const snap = await getDoc(userRef)
+
+    if (!snap.exists()) {
+      return { totalPoints: 0, incidentCount: 0 }
+    }
+    const data = snap.data()
+    return {
+      totalPoints: data.totalPoints || 0,
+      incidentCount: data.incidentCount || 0,
+      lastReportAt: data.lastReportAt || null,
+    }
+  } catch (error) {
+    console.error('[ShieldSync] getUserStats error:', error)
+    return { totalPoints: 0, incidentCount: 0 }
+  }
+}
+
+/**
+ * Get incidents reported by a specific user
+ */
+export const getUserIncidents = async (userId, maxResults = 20) => {
+  try {
+    const uid = userId || auth.currentUser?.uid
+    if (!uid) return []
+
+    const q = query(
+      collection(db, 'incidents'),
+      where('userId', '==', uid),
+      orderBy('timestamp', 'desc'),
+      limit(maxResults)
+    )
+
+    const snapshot = await getDocs(q)
+    return snapshot.docs
+      .filter(d => d.data().timestamp != null)
+      .map(d => {
+        const data = d.data()
+        return {
+          id: d.id,
+          ...data,
+          lat: data.latitude,
+          lon: data.longitude,
+        }
+      })
+  } catch (error) {
+    console.error('[ShieldSync] getUserIncidents error:', error)
+    return []
   }
 }

@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const NAV_ITEMS = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Safety Map', path: '/dashboard/map', icon: Map },
-    { name: 'Report Incident', path: '/dashboard/report', icon: FileText },
+    { name: 'Activity', path: '/dashboard/activity', icon: FileText },
     { name: 'Watch Groups', path: '/dashboard/watch', icon: Users },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
 ]
