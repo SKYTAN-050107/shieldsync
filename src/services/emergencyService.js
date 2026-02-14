@@ -1,41 +1,121 @@
 import { calculateDistance } from '../utils/haversine'
-import { db, trackEvent } from './firebase'
-import { collection, getDocs } from 'firebase/firestore'
-import { emergencyServices } from '../data/mockSafetyData'
+import { trackEvent } from './firebase'
+
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+
+// Johor Bahru bounding box (covers the whole city + surroundings)
+// south, west, north, east
+const JB_BBOX = '1.35,103.55,1.70,103.90'
 
 /**
- * Fetch emergency services (police, fire, hospitals)
- * @param {boolean} useFirestore - Use Firestore or mock data
- * @returns {Promise<Array>} List of emergency services
+ * Build Overpass QL query using a city-wide bounding box instead of a radius.
+ * Fetches ALL police, hospitals and fire stations within the JB bbox once.
  */
-export const fetchEmergencyServices = async (useFirestore = false) => {
+const buildOverpassQuery = () => {
+  return `
+    [out:json][timeout:25];
+    (
+      node["amenity"="police"](${JB_BBOX});
+      way["amenity"="police"](${JB_BBOX});
+      node["amenity"="hospital"](${JB_BBOX});
+      way["amenity"="hospital"](${JB_BBOX});
+      node["amenity"="fire_station"](${JB_BBOX});
+      way["amenity"="fire_station"](${JB_BBOX});
+    );
+    out center body;
+  `
+}
+
+/**
+ * Map Overpass amenity type to our internal type
+ */
+const mapAmenityType = (amenity) => {
+  const mapping = { police: 'police', hospital: 'hospital', fire_station: 'fire' }
+  return mapping[amenity] || 'police'
+}
+
+// Simple in-memory cache so we only hit Overpass once per session
+let _cache = null
+
+/**
+ * Fetch ALL emergency services in JB from Overpass, sort by distance, return top N.
+ * @param {number} lat  User latitude
+ * @param {number} lon  User longitude
+ * @param {number} topN Maximum stations to return (default 10)
+ */
+export const fetchEmergencyServices = async (lat = 1.4927, lon = 103.7414, topN = 10) => {
   try {
-    if (!useFirestore) {
-      // Use mock data for demo
-      trackEvent('emergency_services_loaded', {
-        source: 'mock',
-        count: emergencyServices.length
-      })
-      return emergencyServices
+    // Return cached data re-sorted for the new position
+    if (_cache) {
+      const sorted = _cache
+        .map(s => ({ ...s, distance: calculateDistance(lat, lon, s.lat, s.lon) }))
+        .sort((a, b) => a.distance - b.distance)
+      return sorted.slice(0, topN)
     }
-    
-    // Fetch from Firestore in production
-    const servicesSnapshot = await getDocs(collection(db, 'emergencyServices'))
-    const services = servicesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-    
-    trackEvent('emergency_services_loaded', {
-      source: 'firestore',
-      count: services.length
+
+    const q = buildOverpassQuery()
+    const res = await fetch(OVERPASS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `data=${encodeURIComponent(q)}`
     })
-    
-    return services
+
+    if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`)
+
+    const json = await res.json()
+
+    const allServices = json.elements
+      .filter(el => el.tags?.amenity)
+      .map((el) => {
+        const type = mapAmenityType(el.tags.amenity)
+        // For ways, Overpass returns center coords when using "out center"
+        const elLat = el.lat ?? el.center?.lat
+        const elLon = el.lon ?? el.center?.lon
+        if (!elLat || !elLon) return null
+        return {
+          id: `osm_${el.id}`,
+          name: el.tags?.name || `${type.charAt(0).toUpperCase() + type.slice(1)} Station`,
+          type,
+          lat: elLat,
+          lon: elLon,
+          phone: el.tags?.phone || el.tags?.['contact:phone'] || '',
+          address: el.tags?.['addr:full'] || el.tags?.['addr:street'] || '',
+          status: 'open24hr',
+          responseTime: type === 'police' ? 8 : type === 'fire' ? 6 : 15,
+        }
+      })
+      .filter(Boolean)
+
+    // Store full set in cache
+    _cache = allServices
+
+    // Sort by distance and slice top N
+    const sorted = allServices
+      .map(s => ({ ...s, distance: calculateDistance(lat, lon, s.lat, s.lon) }))
+      .sort((a, b) => a.distance - b.distance)
+
+    trackEvent('emergency_services_loaded', { source: 'overpass', total: allServices.length, shown: Math.min(topN, sorted.length) })
+    return sorted.slice(0, topN)
   } catch (error) {
-    console.error('Error fetching emergency services:', error)
-    return emergencyServices // Fallback to mock data
+    console.warn('Overpass API failed, using fallback mock data:', error.message)
+    const { emergencyServices } = await import('../data/mockSafetyData')
+    const services = emergencyServices
+      .map(s => ({ ...s, distance: calculateDistance(lat, lon, s.lat, s.lon) }))
+      .sort((a, b) => a.distance - b.distance)
+    trackEvent('emergency_services_loaded', { source: 'mock_fallback', count: services.length })
+    return services.slice(0, topN)
   }
+}
+
+/**
+ * Get ALL cached services (unsliced) for filtering.
+ * Returns empty array if Overpass hasn't been fetched yet.
+ */
+export const getAllCachedServices = (lat, lon) => {
+  if (!_cache) return []
+  return _cache
+    .map(s => ({ ...s, distance: calculateDistance(lat, lon, s.lat, s.lon) }))
+    .sort((a, b) => a.distance - b.distance)
 }
 
 /**
@@ -52,7 +132,6 @@ export const sortServicesByDistance = (services, userLat, userLon) => {
 
 /**
  * Filter services by type
- * @param {string} type - 'police', 'fire', 'hospital', or 'all'
  */
 export const filterByType = (services, type) => {
   if (type === 'all') return services
@@ -69,7 +148,7 @@ export const getNearestByType = (services, userLat, userLon, type) => {
 }
 
 /**
- * Initiation emergency call
+ * Initiate emergency call
  */
 export const callEmergencyNumber = (service) => {
   trackEvent('emergency_call_initiated', {

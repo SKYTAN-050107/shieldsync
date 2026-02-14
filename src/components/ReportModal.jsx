@@ -25,11 +25,11 @@ export default function ReportModal({ isOpen, onClose, userLocation }) {
 
     setIsSubmitting(true)
     try {
+      const loc = userLocation || { lat: 1.4927, lon: 103.7414 }
       const reportData = {
         type: selectedType.id,
         description,
-        location: userLocation || { lat: 1.4927, lon: 103.7414 },
-        timestamp: new Date().toISOString(),
+        location: loc,        // submitReport extracts lat/lon from this
       }
 
       await submitReport(reportData)

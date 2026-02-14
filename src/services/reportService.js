@@ -1,96 +1,86 @@
 import { db, auth, trackEvent } from './firebase'
 import { 
   collection, addDoc, getDocs, updateDoc, doc,
-  query, where, orderBy, limit, Timestamp, increment 
+  query, where, orderBy, limit, Timestamp, increment,
+  onSnapshot, serverTimestamp
 } from 'firebase/firestore'
 import { signInAnonymously } from 'firebase/auth'
 
 /**
- * Ensure user is anonymously authenticated
- * Creates anonymous account on first use
+ * Ensure user is authenticated (anonymous or signed-in)
  */
-export const ensureAnonymousAuth = async () => {
+export const ensureAuth = async () => {
   try {
     if (!auth.currentUser) {
       const userCredential = await signInAnonymously(auth)
-      console.log('Anonymous user created:', userCredential.user.uid)
-      
-      trackEvent('anonymous_auth_created', {
-        uid: userCredential.user.uid
-      })
+      trackEvent('anonymous_auth_created', { uid: userCredential.user.uid })
     }
     return auth.currentUser.uid
   } catch (error) {
-    console.error('Anonymous auth error:', error)
+    console.error('Auth error:', error)
     throw error
   }
 }
 
 /**
- * Submit incident report anonymously
+ * Submit incident report to Firestore
+ * Confirmed structure: type, description, latitude, longitude, timestamp, userId
  */
 export const submitReport = async (reportData) => {
   try {
-    // Ensure anonymous authentication
-    const userId = await ensureAnonymousAuth()
-    
+    const userId = await ensureAuth()
+
     const report = {
-      ...reportData,
+      type: reportData.type,
+      description: reportData.description || '',
+      latitude: reportData.location?.lat ?? reportData.latitude ?? 1.4927,
+      longitude: reportData.location?.lon ?? reportData.longitude ?? 103.7414,
+      timestamp: serverTimestamp(),
       userId,
-      timestamp: new Date().toISOString(),
-      createdAt: Timestamp.now(),
-      verified: false,
-      upvotes: 0,
-      status: 'pending'
     }
-    
-    // Add to Firestore
+
     const docRef = await addDoc(collection(db, 'incidents'), report)
-    
-    // Track in Analytics
+
     trackEvent('incident_reported', {
-      incident_type: reportData.type,
-      location: reportData.location,
-      severity: reportData.severity || 'medium'
+      incident_type: report.type,
+      lat: report.latitude,
+      lon: report.longitude,
     })
-    
+
     return { success: true, id: docRef.id, report }
   } catch (error) {
     console.error('Report submission error:', error)
-    trackEvent('report_submission_error', {
-      error: error.message
-    })
+    trackEvent('report_submission_error', { error: error.message })
     return { success: false, error: error.message }
   }
 }
 
 /**
- * Fetch recent incidents (last N hours)
+ * Fetch recent incidents from Firestore (one-time read)
  */
-export const fetchRecentIncidents = async (hours = 24, useFirestore = false) => {
+export const fetchRecentIncidents = async (hours = 24) => {
   try {
-    if (!useFirestore) {
-      // Use mock data for demo
-      const { mockIncidents } = await import('../data/mockSafetyData')
-      return mockIncidents
-    }
-    
     const cutoffTime = Timestamp.fromDate(
       new Date(Date.now() - hours * 60 * 60 * 1000)
     )
-    
+
     const q = query(
       collection(db, 'incidents'),
-      where('createdAt', '>=', cutoffTime),
-      orderBy('createdAt', 'desc'),
+      where('timestamp', '>=', cutoffTime),
+      orderBy('timestamp', 'desc'),
       limit(50)
     )
-    
+
     const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
+    return snapshot.docs.map(d => {
+      const data = d.data()
+      return {
+        id: d.id,
+        ...data,
+        lat: data.latitude,
+        lon: data.longitude,
+      }
+    })
   } catch (error) {
     console.error('Error fetching incidents:', error)
     return []
@@ -98,21 +88,48 @@ export const fetchRecentIncidents = async (hours = 24, useFirestore = false) => 
 }
 
 /**
+ * Real-time listener for incidents – returns an unsubscribe function
+ */
+export const subscribeToIncidents = (hours = 24, callback) => {
+  const cutoffTime = Timestamp.fromDate(
+    new Date(Date.now() - hours * 60 * 60 * 1000)
+  )
+
+  const q = query(
+    collection(db, 'incidents'),
+    where('timestamp', '>=', cutoffTime),
+    orderBy('timestamp', 'desc'),
+    limit(50)
+  )
+
+  return onSnapshot(q, (snapshot) => {
+    const incidents = snapshot.docs.map(d => {
+      const data = d.data()
+      return {
+        id: d.id,
+        ...data,
+        lat: data.latitude,
+        lon: data.longitude,
+      }
+    })
+    callback(incidents)
+  }, (error) => {
+    console.error('Incident listener error:', error)
+    callback([])
+  })
+}
+
+/**
  * Upvote an incident (confirm it's real)
  */
 export const upvoteIncident = async (incidentId) => {
   try {
-    await ensureAnonymousAuth()
-    
+    await ensureAuth()
+
     const incidentRef = doc(db, 'incidents', incidentId)
-    await updateDoc(incidentRef, {
-      upvotes: increment(1)
-    })
-    
-    trackEvent('incident_upvoted', {
-      incident_id: incidentId
-    })
-    
+    await updateDoc(incidentRef, { upvotes: increment(1) })
+
+    trackEvent('incident_upvoted', { incident_id: incidentId })
     return { success: true }
   } catch (error) {
     console.error('Upvote error:', error)

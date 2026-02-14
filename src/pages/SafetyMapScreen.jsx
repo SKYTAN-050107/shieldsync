@@ -1,49 +1,68 @@
 import { useState, useEffect } from 'react'
 import { trackEvent } from '../services/firebase'
-import { fetchEmergencyServices } from '../services/emergencyService'
-import { fetchRecentIncidents } from '../services/reportService'
+import { fetchEmergencyServices, getAllCachedServices, filterByType } from '../services/emergencyService'
+import { subscribeToIncidents } from '../services/reportService'
+import { getUserLocation } from '../services/locationService'
 import SafetyMap from '../components/SafetyMap'
 import ReportModal from '../components/ReportModal'
 import EmergencyCard from '../components/EmergencyCard'
 import IncidentCard from '../components/IncidentCard'
-import { AlertTriangle, Layers, Radio } from 'lucide-react'
+import { AlertTriangle, Layers, Radio, Shield, Flame, Cross } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const FILTER_OPTIONS = [
+  { id: 'all', label: 'All', icon: Layers, color: 'text-white/80', activeBg: 'bg-white/15' },
+  { id: 'police', label: 'Police', icon: Shield, color: 'text-primary-400', activeBg: 'bg-primary-500/20' },
+  { id: 'fire', label: 'Fire', icon: Flame, color: 'text-warning-400', activeBg: 'bg-warning-500/20' },
+  { id: 'hospital', label: 'Hospital', icon: Cross, color: 'text-safe-400', activeBg: 'bg-safe-500/20' },
+]
+
 export default function SafetyMapScreen() {
-  const [userLocation] = useState({ lat: 1.4927, lon: 103.7414 })
+  const [userLocation, setUserLocation] = useState(null)
   const [services, setServices] = useState([])
   const [incidents, setIncidents] = useState([])
   const [selectedService, setSelectedService] = useState(null)
   const [selectedIncident, setSelectedIncident] = useState(null)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [allServices, setAllServices] = useState([])
+  const [activeFilter, setActiveFilter] = useState('all')
 
+  // 1. Get real user location
   useEffect(() => {
-    loadData()
     trackEvent('safety_map_viewed')
+    getUserLocation()
+      .then((loc) => setUserLocation({ lat: loc.lat, lon: loc.lon }))
+      .catch(() => setUserLocation({ lat: 1.4927, lon: 103.7414 }))
   }, [])
 
-  const loadData = async () => {
+  // 2. Fetch services from Overpass (bounding-box for all of JB, cached)
+  useEffect(() => {
+    if (!userLocation) return
     setLoading(true)
-    try {
-      const [fetchedServices, fetchedIncidents] = await Promise.all([
-        fetchEmergencyServices(),
-        fetchRecentIncidents()
-      ])
+    fetchEmergencyServices(userLocation.lat, userLocation.lon, 100) // fetch large set, we filter client-side
+      .then((svc) => {
+        setAllServices(svc)
+        setServices(svc)
+      })
+      .catch(() => { setAllServices([]); setServices([]) })
+      .finally(() => setLoading(false))
+  }, [userLocation])
 
-      const servicesWithDist = fetchedServices.map(s => ({
-        ...s,
-        distance: 1.2
-      }))
+  // 3b. Re-filter when activeFilter changes
+  useEffect(() => {
+    if (!userLocation) return
+    const base = allServices.length ? allServices : getAllCachedServices(userLocation.lat, userLocation.lon)
+    const filtered = filterByType(base, activeFilter)
+    // Show top 10 nearest of the selected type
+    setServices(filtered.slice(0, 10))
+  }, [activeFilter, allServices])
 
-      setServices(servicesWithDist)
-      setIncidents(fetchedIncidents)
-    } catch (error) {
-      console.error('Error loading map data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // 3. Real-time Firestore listener for community incidents
+  useEffect(() => {
+    const unsub = subscribeToIncidents(24, (data) => setIncidents(data))
+    return () => unsub()
+  }, [])
 
   return (
     <div className="relative h-screen w-full bg-surface-900 overflow-hidden">
@@ -64,19 +83,42 @@ export default function SafetyMapScreen() {
         />
       </div>
 
-      {/* Report Button (Floating) */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsReportModalOpen(true)}
-        className="absolute top-6 right-6 z-50 px-6 py-2.5 
-                   bg-gradient-to-r from-danger-600 to-danger-500
-                   text-white font-bold text-sm rounded-xl shadow-lg shadow-danger-600/30
-                   flex items-center gap-2"
-      >
-        <AlertTriangle size={16} />
-        REPORT
-      </motion.button>
+      {/* Top bar: Filter + Report */}
+      <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between gap-2">
+        {/* Dynamic Filter Buttons */}
+        <div className="flex gap-1.5">
+          {FILTER_OPTIONS.map((f) => {
+            const Icon = f.icon
+            const isActive = activeFilter === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => setActiveFilter(f.id)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all
+                  ${isActive
+                    ? `${f.activeBg} ${f.color} border border-white/15 shadow-lg`
+                    : 'bg-surface-800/80 text-white/40 border border-white/5 hover:bg-white/10'}`}
+              >
+                <Icon size={14} />
+                <span className="hidden sm:inline">{f.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Report Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsReportModalOpen(true)}
+          className="px-5 py-2.5 bg-gradient-to-r from-danger-600 to-danger-500
+                     text-white font-bold text-xs rounded-xl shadow-lg shadow-danger-600/30
+                     flex items-center gap-2 flex-shrink-0"
+        >
+          <AlertTriangle size={14} />
+          REPORT
+        </motion.button>
+      </div>
 
       {/* Detail Overlay */}
       <AnimatePresence>
@@ -148,10 +190,7 @@ export default function SafetyMapScreen() {
 
       <ReportModal
         isOpen={isReportModalOpen}
-        onClose={() => {
-          setIsReportModalOpen(false)
-          loadData()
-        }}
+        onClose={() => setIsReportModalOpen(false)}
         userLocation={userLocation}
       />
     </div>

@@ -4,7 +4,7 @@ import {
   query, where, orderBy, limit, onSnapshot,
   Timestamp, arrayUnion, increment 
 } from 'firebase/firestore'
-import { ensureAnonymousAuth } from './reportService'
+import { ensureAuth } from './reportService'
 
 /**
  * Fetch watch groups by postcode
@@ -40,7 +40,7 @@ export const fetchWatchGroups = async (postcode, useFirestore = false) => {
  */
 export const joinWatchGroup = async (groupId) => {
   try {
-    const userId = await ensureAnonymousAuth()
+    const userId = await ensureAuth()
     
     const groupRef = doc(db, 'watchGroups', groupId)
     await updateDoc(groupRef, {
@@ -64,7 +64,7 @@ export const joinWatchGroup = async (groupId) => {
  */
 export const postAlert = async (groupId, alertData) => {
   try {
-    const userId = await ensureAnonymousAuth()
+    const userId = await ensureAuth()
     
     const alert = {
       ...alertData,
@@ -114,7 +114,7 @@ export const subscribeToGroupAlerts = (groupId, callback) => {
  */
 export const respondToAlert = async (alertId, response) => {
   try {
-    const userId = await ensureAnonymousAuth()
+    const userId = await ensureAuth()
     
     const alertRef = doc(db, 'groupAlerts', alertId)
     await updateDoc(alertRef, {
@@ -142,7 +142,7 @@ export const respondToAlert = async (alertId, response) => {
  */
 export const createWatchGroup = async (groupData) => {
   try {
-    const userId = await ensureAnonymousAuth()
+    const userId = await ensureAuth()
     
     const group = {
       ...groupData,

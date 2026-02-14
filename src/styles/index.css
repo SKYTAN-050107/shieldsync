@@ -136,3 +136,27 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #2563eb88;
 }
+
+/* ---- Leaflet dark-theme popup override ---- */
+.leaflet-popup-content-wrapper {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+.leaflet-popup-tip {
+  background: #1e293b !important;
+}
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+/* Leaflet attribution bar */
+.leaflet-control-attribution {
+  background: rgba(10,15,30,0.6) !important;
+  color: rgba(255,255,255,0.3) !important;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a {
+  color: rgba(96,165,250,0.5) !important;
+}

@@ -34,7 +34,7 @@ export default function HomeScreen() {
       setLocation(loc)
       setPostcode(loc.postcode || '81200')
 
-      const services = await fetchEmergencyServices()
+      const services = await fetchEmergencyServices(loc.lat, loc.lon)
 
       setNearest({
         police: getNearestByType(services, loc.lat, loc.lon, 'police'),
