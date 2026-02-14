@@ -4,8 +4,8 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-// Use the Firebase project API key (same one) — Gemini API must be enabled in GCP console
-const GEMINI_API_KEY = 'REDACTED_API_KEY'
+// Read Gemini API key from environment variable
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 
 let genAI = null
 let model = null
