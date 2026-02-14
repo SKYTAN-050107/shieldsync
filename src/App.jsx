@@ -8,6 +8,7 @@ import SignUpPage from './pages/SignUpPage'
 import HomeScreen from './pages/HomeScreen'
 import SafetyMapScreen from './pages/SafetyMapScreen'
 import WatchGroupScreen from './pages/WatchGroupScreen'
+import SettingsScreen from './pages/SettingsScreen'
 import DashboardLayout from './components/DashboardLayout'
 import './styles/app.css'
 
@@ -57,6 +58,7 @@ function App() {
           <Route path="map" element={<SafetyMapScreen />} />
           <Route path="report" element={<SafetyMapScreen />} />
           <Route path="watch" element={<WatchGroupScreen />} />
+          <Route path="settings" element={<SettingsScreen />} />
         </Route>
 
         {/* Fallback */}
