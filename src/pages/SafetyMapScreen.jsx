@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { trackEvent } from '../services/firebase'
 import { fetchEmergencyServices } from '../services/emergencyService'
 import { fetchRecentIncidents } from '../services/reportService'
@@ -7,11 +6,10 @@ import SafetyMap from '../components/SafetyMap'
 import ReportModal from '../components/ReportModal'
 import EmergencyCard from '../components/EmergencyCard'
 import IncidentCard from '../components/IncidentCard'
-import { ArrowLeft, AlertTriangle, Layers, Radio } from 'lucide-react'
+import { AlertTriangle, Layers, Radio } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function SafetyMapScreen() {
-  const navigate = useNavigate()
   const [userLocation] = useState({ lat: 1.4927, lon: 103.7414 })
   const [services, setServices] = useState([])
   const [incidents, setIncidents] = useState([])
@@ -48,19 +46,7 @@ export default function SafetyMapScreen() {
   }
 
   return (
-    <div className="relative h-screen w-screen bg-surface-900 overflow-hidden">
-      {/* Back Button */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 z-50 h-11 w-11 glass-card-bright
-                   rounded-xl flex items-center justify-center
-                   hover:border-primary-500/40 transition-all"
-      >
-        <ArrowLeft size={20} className="text-white/80" />
-      </motion.button>
-
+    <div className="relative h-screen w-full bg-surface-900 overflow-hidden">
       {/* Safety Map Component */}
       <div className="absolute inset-0 z-0">
         <SafetyMap

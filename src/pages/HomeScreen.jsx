@@ -78,7 +78,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-900 pb-32 relative z-10">
+    <div className="min-h-screen bg-surface-900 pb-8 relative z-10">
       {/* Hero Header with gradient */}
       <div className="relative overflow-hidden">
         {/* Background gradient */}
@@ -126,7 +126,7 @@ export default function HomeScreen() {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => navigate('/safety-map')}
+          onClick={() => navigate('/dashboard/map')}
           className="py-4 glass-card-bright rounded-2xl flex items-center justify-center gap-2.5
                      text-white font-bold text-sm tracking-wide"
         >
@@ -136,7 +136,7 @@ export default function HomeScreen() {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => navigate('/report')}
+          onClick={() => navigate('/dashboard/report')}
           className="py-4 rounded-2xl flex items-center justify-center gap-2.5
                      bg-gradient-to-r from-warning-600 to-warning-500 text-white font-bold text-sm tracking-wide
                      shadow-lg shadow-warning-600/20"
@@ -202,7 +202,7 @@ export default function HomeScreen() {
             <div>
               <p className="text-white/90 font-bold text-sm">Active Incidents Nearby</p>
               <p className="text-white/40 text-xs mt-0.5">
-                {recentIncidents} reports in last 60 minutes · <span className="text-accent-400 cursor-pointer" onClick={() => navigate('/safety-map')}>View Map</span>
+                {recentIncidents} reports in last 60 minutes · <span className="text-accent-400 cursor-pointer" onClick={() => navigate('/dashboard/map')}>View Map</span>
               </p>
             </div>
             <ChevronRight size={18} className="text-white/20 ml-auto flex-shrink-0" />
@@ -215,7 +215,7 @@ export default function HomeScreen() {
         onClick={handlePanicButton}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-28 right-6 z-50 h-18 w-18 
+        className="fixed bottom-8 right-8 z-50 h-18 w-18 
                    bg-gradient-to-br from-danger-500 to-danger-700 
                    rounded-full flex items-center justify-center 
                    panic-pulse border-2 border-danger-400/30"

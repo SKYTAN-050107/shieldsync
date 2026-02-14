@@ -39,7 +39,7 @@ export default function WatchGroupScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-900 pb-24 relative z-10">
+    <div className="min-h-screen bg-surface-900 pb-8 relative z-10">
       {/* Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-surface-700 via-surface-800 to-surface-900" />
