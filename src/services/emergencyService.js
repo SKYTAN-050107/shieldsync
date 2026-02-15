@@ -3,24 +3,24 @@ import { trackEvent } from './firebase'
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 
-// Johor Bahru bounding box (covers the whole city + surroundings)
+// Malaysia bounding box (covers Peninsular + East Malaysia)
 // south, west, north, east
-const JB_BBOX = '1.35,103.55,1.70,103.90'
+const MY_BBOX = '0.85,99.60,7.50,119.30'
 
 /**
- * Build Overpass QL query using a city-wide bounding box instead of a radius.
- * Fetches ALL police, hospitals and fire stations within the JB bbox once.
+ * Build Overpass QL query using a country-wide bounding box instead of a radius.
+ * Fetches ALL police, hospitals and fire stations within the Malaysia bbox once.
  */
 const buildOverpassQuery = () => {
   return `
-    [out:json][timeout:25];
+    [out:json][timeout:60];
     (
-      node["amenity"="police"](${JB_BBOX});
-      way["amenity"="police"](${JB_BBOX});
-      node["amenity"="hospital"](${JB_BBOX});
-      way["amenity"="hospital"](${JB_BBOX});
-      node["amenity"="fire_station"](${JB_BBOX});
-      way["amenity"="fire_station"](${JB_BBOX});
+      node["amenity"="police"](${MY_BBOX});
+      way["amenity"="police"](${MY_BBOX});
+      node["amenity"="hospital"](${MY_BBOX});
+      way["amenity"="hospital"](${MY_BBOX});
+      node["amenity"="fire_station"](${MY_BBOX});
+      way["amenity"="fire_station"](${MY_BBOX});
     );
     out center body;
   `

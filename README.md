@@ -259,6 +259,7 @@ Create a `.env` file in the project root (see `.env.example`):
 
 ### 4. Emergency Service Finder (`emergencyService`)
 - Overpass API with Johor Bahru bounding box (1.35,103.55 → 1.70,103.90)
+- Modified feature ,Overpass API covering Peninsular and East Malaysia(0.85,99.60,7.50,119.30) for better user testing within Malaysia
 - Returns police, fire stations, hospitals (nodes + ways)
 - In-memory cache prevents repeated API calls
 - Client-side haversine sort → top N nearest
